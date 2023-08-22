@@ -13,3 +13,20 @@ go get github.com/jmoiron/sqlx
 
 # REST API
 go get -u github.com/gin-gonic/gin
+
+# devide directory
+mkdir common
+# - pagin.go
+# - response.go
+# - sql_model.go
+
+mkdir component
+# - app_context.go
+
+mkdir modules
+# microservices
+# with each service
+# - directory biz (business)
+# - model 
+# - storage
+# - transport
