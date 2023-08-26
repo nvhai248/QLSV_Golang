@@ -45,22 +45,13 @@ func APIs(db *sqlx.DB) {
 	{
 		students.GET("", ginstudent.ListStudent(appCtx))
 		students.GET("/:studentID", ginstudent.DetailStudent(appCtx))
-		students.POST("/add", ginstudent.CreateStudent(appCtx))
+		students.POST("/", ginstudent.CreateStudent(appCtx))
 
 		// Other routes...
 
 		students.PATCH("/:studentID", ginstudent.UpdateStudent(appCtx))
 
-		students.DELETE("/:id", func(ctx *gin.Context) {
-			id := ctx.Param("id")
-
-			if _, err := db.Exec("DELETE FROM student WHERE studentID = ?", id); err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-
-			ctx.JSON(http.StatusOK, gin.H{"message": "Success delete!"})
-		})
+		students.DELETE("/:studentID", ginstudent.SoftDeleteStudent(appCtx))
 	}
 
 	router.Run(":8080")

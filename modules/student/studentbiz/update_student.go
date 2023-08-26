@@ -42,6 +42,14 @@ func (biz *updateStudentBiz) UpdateStudent(ctx context.Context,
 		return errors.New("Data deleted!")
 	}
 
+	if data.Name == nil {
+		data.Name = &oldData.Name
+	}
+
+	if data.Birthday == nil {
+		data.Birthday = &oldData.Birthday
+	}
+
 	if err = biz.store.UpdateDataByID(ctx, oldData.StudentID, data); err != nil {
 		return err
 	}
