@@ -2,6 +2,8 @@ package studentbiz
 
 import (
 	"context"
+
+	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 )
 
@@ -20,7 +22,7 @@ func NewCreateStudentBiz(store CreateStudentStore) *createStudentBiz {
 func (biz *createStudentBiz) CreateStudent(ctx context.Context, data *studentmodel.StudentCreate) error {
 
 	if err := data.Validate(); err != nil {
-		return err
+		return common.ErrCannotCreateEntity(studentmodel.EntityName, err)
 	}
 
 	err := biz.store.Create(ctx, data)

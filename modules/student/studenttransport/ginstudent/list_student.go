@@ -17,15 +17,13 @@ func ListStudent(appCtx component.AppContext) gin.HandlerFunc {
 
 		// Bind query parameters or form data to the filter struct
 		if err := c.ShouldBind(&filter); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 		var paging common.Paging
 
 		// Bind query parameters or form data to the filter struct
 		if err := c.ShouldBind(&paging); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		paging.Fulfill()
@@ -38,8 +36,7 @@ func ListStudent(appCtx component.AppContext) gin.HandlerFunc {
 		data, err := biz.ListStudent(c.Request.Context(), &filter, &paging)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(data, paging, filter))

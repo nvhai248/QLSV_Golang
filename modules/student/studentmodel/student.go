@@ -6,6 +6,8 @@ import (
 	"studyGoApp/common"
 )
 
+const EntityName = "Student"
+
 type Student struct {
 	common.SQLModel `json:", inline"`
 
@@ -43,7 +45,6 @@ func (stu *StudentCreate) Validate() error {
 
 	if len(stu.Name) == 0 {
 		return errors.New("student name cannot be blank!")
-
 	}
 
 	return nil

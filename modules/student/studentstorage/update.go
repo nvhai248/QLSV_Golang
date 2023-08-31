@@ -3,6 +3,7 @@ package studentstorage
 import (
 	"context"
 	"fmt"
+	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 	"time"
 )
@@ -29,7 +30,7 @@ func (s *sqlStore) UpdateDataByID(ctx context.Context,
 	} */
 
 	if _, err := db.Exec("UPDATE student SET name = ?, birthday = ? WHERE studentID = ?", data.Name, parsedTime, studentID); err != nil {
-		return err
+		return common.ErrDB(err)
 	}
 
 	return nil

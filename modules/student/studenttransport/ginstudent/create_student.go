@@ -16,16 +16,14 @@ func CreateStudent(appCtx component.AppContext) gin.HandlerFunc {
 		var data studentmodel.StudentCreate
 
 		if err := c.ShouldBindJSON(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
 		biz := studentbiz.NewCreateStudentBiz(store)
 
 		if err := biz.CreateStudent(c.Request.Context(), &data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))

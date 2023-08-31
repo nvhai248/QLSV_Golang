@@ -2,7 +2,7 @@ package studentbiz
 
 import (
 	"context"
-	"errors"
+	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 )
 
@@ -35,11 +35,11 @@ func (biz *updateStudentBiz) UpdateStudent(ctx context.Context,
 	oldData, err := biz.store.DetailStudent(ctx, studentID)
 
 	if err != nil {
-		return err
+		return common.ErrCannotGetEntity(studentmodel.EntityName, err)
 	}
 
 	if oldData.Status == 0 {
-		return errors.New("Data deleted!")
+		return common.NewCustomError(nil, "Data deleted!", studentmodel.EntityName)
 	}
 
 	if data.Name == nil {
@@ -51,7 +51,7 @@ func (biz *updateStudentBiz) UpdateStudent(ctx context.Context,
 	}
 
 	if err = biz.store.UpdateDataByID(ctx, oldData.StudentID, data); err != nil {
-		return err
+		return common.ErrCannotUpdateEntity(studentmodel.EntityName, err)
 	}
 
 	return nil

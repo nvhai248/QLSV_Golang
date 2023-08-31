@@ -45,6 +45,12 @@ func (s *sqlStore) ListDataByCondition(ctx context.Context,
 		}
 		conditionsAndMore += "name = ?"
 		args = append(args, v)
+	} else {
+		if len(conditions) > 0 {
+			conditionsAndMore += " AND status in (1)"
+		} else {
+			conditionsAndMore += " WHERE status in (1)"
+		}
 	}
 
 	var students []studentmodel.Student
@@ -57,7 +63,7 @@ func (s *sqlStore) ListDataByCondition(ctx context.Context,
 
 	query = db.Rebind(query + conditionsAndMore)
 	if err := db.Select(&students, query, args...); err != nil {
-		return nil, err
+		return nil, common.ErrDB(err)
 	}
 
 	// count paging
@@ -65,7 +71,7 @@ func (s *sqlStore) ListDataByCondition(ctx context.Context,
 	countQuery := "SELECT COUNT(*) FROM student"
 
 	if err := db.Get(&total, countQuery); err != nil {
-		return nil, err
+		return nil, common.ErrDB(err)
 	}
 
 	paging.Total = total

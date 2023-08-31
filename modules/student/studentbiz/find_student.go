@@ -2,6 +2,7 @@ package studentbiz
 
 import (
 	"context"
+	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 )
 
@@ -25,6 +26,18 @@ func (s *detailStudentStore) DetailStudent(ctx context.Context,
 	studentID string,
 ) (*studentmodel.StudentDetail, error) {
 	result, err := s.store.DetailStudent(ctx, studentID)
+
+	if err != nil {
+		if err != common.ErrorNoRows {
+			return nil, common.ErrCannotGetEntity(studentmodel.EntityName, err)
+		}
+
+		return nil, common.ErrCannotGetEntity(studentmodel.EntityName, err)
+	}
+
+	if result.Status != 1 {
+		return nil, common.ErrEntityDeleted(studentmodel.EntityName, nil)
+	}
 
 	return result, err
 }

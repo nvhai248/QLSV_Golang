@@ -20,8 +20,7 @@ func DetailStudent(appCtx component.AppContext) gin.HandlerFunc {
 		result, err := biz.DetailStudent(c.Request.Context(), studentID)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(result))

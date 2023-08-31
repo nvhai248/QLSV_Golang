@@ -2,7 +2,7 @@ package studentbiz
 
 import (
 	"context"
-	"errors"
+	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 )
 
@@ -11,7 +11,7 @@ type SoftDeleteStudentStore interface {
 		ctx context.Context,
 		studentID string,
 	) (*studentmodel.StudentDetail, error)
-	SoftDeteleStudentByStudentID(
+	SoftDeleteStudentByStudentID(
 		ctx context.Context,
 		studentID string,
 	) error
@@ -33,15 +33,15 @@ func (biz *softDeleteStudentBiz) SoftDeleteStudent(ctx context.Context,
 	oldData, err := biz.store.DetailStudent(ctx, studentID)
 
 	if err != nil {
-		return err
+		return common.ErrCannotGetEntity(studentmodel.EntityName, err)
 	}
 
 	if oldData.Status == 0 {
-		return errors.New("Data deleted!")
+		return common.NewCustomError(nil, "Data deleted!", studentmodel.EntityName)
 	}
 
-	if err = biz.store.SoftDeteleStudentByStudentID(ctx, oldData.StudentID); err != nil {
-		return err
+	if err = biz.store.SoftDeleteStudentByStudentID(ctx, oldData.StudentID); err != nil {
+		return common.ErrCannotDeleteEntity(studentmodel.EntityName, err)
 	}
 
 	return nil

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"studyGoApp/component"
+	"studyGoApp/middleware"
 	"studyGoApp/modules/student/studenttransport/ginstudent"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,10 @@ func ConnectToDB(dns string) *sqlx.DB {
 }
 
 func APIs(db *sqlx.DB) {
+	appCtx := component.NewAppContext(db)
 	router := gin.Default()
+
+	router.Use(middleware.Recover(appCtx))
 
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -39,7 +43,6 @@ func APIs(db *sqlx.DB) {
 	})
 
 	// CRUD
-	appCtx := component.NewAppContext(db)
 
 	students := router.Group("/students")
 	{

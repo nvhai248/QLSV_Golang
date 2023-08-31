@@ -18,16 +18,14 @@ func UpdateStudent(appCtx component.AppContext) gin.HandlerFunc {
 		var data studentmodel.StudentUpdate
 
 		if err := c.ShouldBindJSON(&data); err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
 		biz := studentbiz.NewUpdateStudentBiz(store)
 
 		if err := biz.UpdateStudent(c.Request.Context(), studentID, &data); err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))

@@ -18,8 +18,7 @@ func SoftDeleteStudent(appCtx component.AppContext) gin.HandlerFunc {
 		biz := studentbiz.NewSoftDeleteStudentBiz(store)
 
 		if err := biz.SoftDeleteStudent(c.Request.Context(), studentID); err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
