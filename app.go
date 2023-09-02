@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"os"
 	"studyGoApp/component"
+	"studyGoApp/component/uploadprovider"
 	"studyGoApp/middleware"
 	"studyGoApp/modules/student/studenttransport/ginstudent"
+	"studyGoApp/modules/upload/uploadtransport/ginupload"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -30,8 +32,9 @@ func ConnectToDB(dns string) *sqlx.DB {
 	return db
 }
 
-func APIs(db *sqlx.DB) {
-	appCtx := component.NewAppContext(db)
+func runServices(db *sqlx.DB, upProvider uploadprovider.UploadProvider) {
+
+	appCtx := component.NewAppContext(db, upProvider)
 	router := gin.Default()
 
 	router.Use(middleware.Recover(appCtx))
@@ -42,18 +45,16 @@ func APIs(db *sqlx.DB) {
 		})
 	})
 
-	// CRUD
+	// upload photo
+	router.POST("/upload", ginupload.Upload(appCtx))
 
+	// CRUD
 	students := router.Group("/students")
 	{
 		students.GET("", ginstudent.ListStudent(appCtx))
 		students.GET("/:studentID", ginstudent.DetailStudent(appCtx))
 		students.POST("/", ginstudent.CreateStudent(appCtx))
-
-		// Other routes...
-
 		students.PATCH("/:studentID", ginstudent.UpdateStudent(appCtx))
-
 		students.DELETE("/:studentID", ginstudent.SoftDeleteStudent(appCtx))
 	}
 
@@ -71,7 +72,12 @@ func main() {
 	// Connect to the database
 	db := ConnectToDB(dns)
 
-	fmt.Println(db)
+	s3BucketName := os.Getenv("S3BucketName")
+	s3Region := os.Getenv("S3Region")
+	s3ApiKey := os.Getenv("S3ApiKey")
+	s3Secret := os.Getenv("S3Secret")
+	s3Domain := os.Getenv("S3Domain")
+	s3upProvider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3ApiKey, s3Secret, s3Domain)
 
-	APIs(db)
+	runServices(db, s3upProvider)
 }

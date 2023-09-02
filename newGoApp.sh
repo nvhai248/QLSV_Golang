@@ -30,3 +30,9 @@ mkdir modules
 # - model 
 # - storage
 # - transport
+
+# get AWS to upload photos and files
+go get github.com/aws/aws-sdk-go
+
+# handle image upload
+go get github.com/disintegration/imaging
