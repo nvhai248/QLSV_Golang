@@ -9,7 +9,7 @@ import (
 )
 
 func (s *sqlStore) UpdateDataByID(ctx context.Context,
-	studentID string,
+	id int,
 	data *studentmodel.StudentUpdate,
 ) error {
 	db := s.db
@@ -29,7 +29,7 @@ func (s *sqlStore) UpdateDataByID(ctx context.Context,
 		return err
 	} */
 
-	if _, err := db.Exec("UPDATE student SET name = ?, birthday = ? WHERE studentID = ?", data.Name, parsedTime, studentID); err != nil {
+	if _, err := db.Exec("UPDATE student SET name = ?, birthday = ? WHERE id = ?", data.Name, parsedTime, id); err != nil {
 		return common.ErrDB(err)
 	}
 

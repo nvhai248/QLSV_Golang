@@ -9,11 +9,11 @@ import (
 type SoftDeleteStudentStore interface {
 	DetailStudent(
 		ctx context.Context,
-		studentID string,
+		id int,
 	) (*studentmodel.StudentDetail, error)
 	SoftDeleteStudentByStudentID(
 		ctx context.Context,
-		studentID string,
+		id int,
 	) error
 }
 
@@ -28,9 +28,9 @@ func NewSoftDeleteStudentBiz(store SoftDeleteStudentStore) *softDeleteStudentBiz
 }
 
 func (biz *softDeleteStudentBiz) SoftDeleteStudent(ctx context.Context,
-	studentID string,
+	id int,
 ) error {
-	oldData, err := biz.store.DetailStudent(ctx, studentID)
+	oldData, err := biz.store.DetailStudent(ctx, id)
 
 	if err != nil {
 		return common.ErrCannotGetEntity(studentmodel.EntityName, err)
@@ -40,7 +40,7 @@ func (biz *softDeleteStudentBiz) SoftDeleteStudent(ctx context.Context,
 		return common.NewCustomError(nil, "Data deleted!", studentmodel.EntityName)
 	}
 
-	if err = biz.store.SoftDeleteStudentByStudentID(ctx, oldData.StudentID); err != nil {
+	if err = biz.store.SoftDeleteStudentByStudentID(ctx, id); err != nil {
 		return common.ErrCannotDeleteEntity(studentmodel.EntityName, err)
 	}
 

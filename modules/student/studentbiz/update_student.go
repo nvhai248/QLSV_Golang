@@ -9,11 +9,11 @@ import (
 type UpdateStudentStore interface {
 	DetailStudent(
 		ctx context.Context,
-		studentID string,
+		id int,
 	) (*studentmodel.StudentDetail, error)
 	UpdateDataByID(
 		ctx context.Context,
-		studentID string,
+		id int,
 		data *studentmodel.StudentUpdate,
 	) error
 }
@@ -29,10 +29,10 @@ func NewUpdateStudentBiz(store UpdateStudentStore) *updateStudentBiz {
 }
 
 func (biz *updateStudentBiz) UpdateStudent(ctx context.Context,
-	studentID string,
+	id int,
 	data *studentmodel.StudentUpdate,
 ) error {
-	oldData, err := biz.store.DetailStudent(ctx, studentID)
+	oldData, err := biz.store.DetailStudent(ctx, id)
 
 	if err != nil {
 		return common.ErrCannotGetEntity(studentmodel.EntityName, err)
@@ -50,7 +50,7 @@ func (biz *updateStudentBiz) UpdateStudent(ctx context.Context,
 		data.Birthday = &oldData.Birthday
 	}
 
-	if err = biz.store.UpdateDataByID(ctx, oldData.StudentID, data); err != nil {
+	if err = biz.store.UpdateDataByID(ctx, id, data); err != nil {
 		return common.ErrCannotUpdateEntity(studentmodel.EntityName, err)
 	}
 

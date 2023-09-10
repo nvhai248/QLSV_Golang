@@ -13,7 +13,11 @@ import (
 
 func UpdateStudent(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		studentID := c.Param("studentID")
+		uid, err := common.FromBase58(c.Param("id"))
+
+		if err != nil {
+			panic(common.ErrInternal(err))
+		}
 
 		var data studentmodel.StudentUpdate
 
@@ -24,7 +28,7 @@ func UpdateStudent(appCtx component.AppContext) gin.HandlerFunc {
 		store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
 		biz := studentbiz.NewUpdateStudentBiz(store)
 
-		if err := biz.UpdateStudent(c.Request.Context(), studentID, &data); err != nil {
+		if err := biz.UpdateStudent(c.Request.Context(), int(uid.GetLocalID()), &data); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
 

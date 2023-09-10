@@ -16,3 +16,7 @@ type StudentDetail struct {
 func (StudentDetail) TableName() string {
 	return Student{}.TableName()
 }
+
+func (data *StudentDetail) Mask(isAdminOrOwner bool) {
+	data.GenUID(common.DbTypeStudent)
+}

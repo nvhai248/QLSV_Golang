@@ -36,3 +36,6 @@ go get github.com/aws/aws-sdk-go
 
 # handle image upload
 go get github.com/disintegration/imaging
+
+#secure id of user
+go get -u github.com/btcsuite/btcutil/base58

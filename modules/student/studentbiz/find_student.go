@@ -8,7 +8,7 @@ import (
 
 type DetailStudentStore interface {
 	DetailStudent(ctx context.Context,
-		studentID string,
+		id int,
 	) (*studentmodel.StudentDetail, error)
 }
 
@@ -23,9 +23,9 @@ func NewDetailStudentStore(store DetailStudentStore) *detailStudentStore {
 }
 
 func (s *detailStudentStore) DetailStudent(ctx context.Context,
-	studentID string,
+	id int,
 ) (*studentmodel.StudentDetail, error) {
-	result, err := s.store.DetailStudent(ctx, studentID)
+	result, err := s.store.DetailStudent(ctx, id)
 
 	if err != nil {
 		if err != common.ErrorNoRows {

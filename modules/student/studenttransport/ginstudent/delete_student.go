@@ -12,12 +12,16 @@ import (
 
 func SoftDeleteStudent(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		studentID := c.Param("studentID")
+		uid, err := common.FromBase58(c.Param("id"))
+
+		if err != nil {
+			panic(common.ErrInternal(err))
+		}
 
 		store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
 		biz := studentbiz.NewSoftDeleteStudentBiz(store)
 
-		if err := biz.SoftDeleteStudent(c.Request.Context(), studentID); err != nil {
+		if err := biz.SoftDeleteStudent(c.Request.Context(), int(uid.GetLocalID())); err != nil {
 			panic(err)
 		}
 

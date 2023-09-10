@@ -35,6 +35,8 @@ func (StudentUpdate) TableName() string {
 }
 
 type StudentCreate struct {
+	common.SQLModel `json:", inline"`
+
 	StudentID string         `db:"studentID" json:"studentID"`
 	Birthday  string         `db:"birthday" json:"birthday"`
 	Name      string         `db:"name" json:"name"`
@@ -54,4 +56,16 @@ func (stu *StudentCreate) Validate() error {
 	}
 
 	return nil
+}
+
+var (
+	ErrNameCannotBeEmpty = common.NewCustomError(nil, "student name can't be blank", "StudentNameErr")
+)
+
+func (data *Student) Mask(isAdminOrOwner bool) {
+	data.GenUID(common.DbTypeStudent)
+}
+
+func (data *StudentCreate) Mask(isAdminOrOwner bool) {
+	data.GenUID(common.DbTypeStudent)
 }

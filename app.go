@@ -52,10 +52,10 @@ func runServices(db *sqlx.DB, upProvider uploadprovider.UploadProvider) {
 	students := router.Group("/students")
 	{
 		students.GET("", ginstudent.ListStudent(appCtx))
-		students.GET("/:studentID", ginstudent.DetailStudent(appCtx))
+		students.GET("/:id", ginstudent.DetailStudent(appCtx))
 		students.POST("/", ginstudent.CreateStudent(appCtx))
-		students.PATCH("/:studentID", ginstudent.UpdateStudent(appCtx))
-		students.DELETE("/:studentID", ginstudent.SoftDeleteStudent(appCtx))
+		students.PATCH("/:id", ginstudent.UpdateStudent(appCtx))
+		students.DELETE("/:id", ginstudent.SoftDeleteStudent(appCtx))
 	}
 
 	router.Run(":8080")
