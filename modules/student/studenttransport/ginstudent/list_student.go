@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"studyGoApp/common"
 	"studyGoApp/component"
+	classregisterstorage "studyGoApp/modules/classregister/storage"
 	"studyGoApp/modules/student/studentbiz"
 	"studyGoApp/modules/student/studentmodel"
 	"studyGoApp/modules/student/studentstorage"
@@ -31,7 +32,8 @@ func ListStudent(appCtx component.AppContext) gin.HandlerFunc {
 		fmt.Println(paging.Limit) */
 
 		store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := studentbiz.NewListStudentBiz(store)
+		classStore := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		biz := studentbiz.NewListStudentBiz(store, classStore)
 
 		data, err := biz.ListStudent(c.Request.Context(), &filter, &paging)
 

@@ -11,11 +11,12 @@ const EntityName = "Student"
 type Student struct {
 	common.SQLModel `json:", inline"`
 
-	StudentID string         `db:"studentID" json:"studentID"`
-	Birthday  string         `db:"birthday" json:"birthday"`
-	Name      string         `db:"name" json:"name"`
-	Avatar    *common.Image  `json:"avatar" json:"avatar"`
-	Cover     *common.Images `json:"cover" json:"cover"`
+	StudentID  string         `db:"studentID" json:"studentID"`
+	Birthday   string         `db:"birthday" json:"birthday"`
+	Name       string         `db:"name" json:"name"`
+	Avatar     *common.Image  `json:"avatar" json:"avatar"`
+	Cover      *common.Images `json:"cover" json:"cover"`
+	ClassCount int            `json:"class_count" json:"-"`
 }
 
 func (Student) TableName() string {
