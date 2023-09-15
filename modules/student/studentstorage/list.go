@@ -2,6 +2,7 @@ package studentstorage
 
 import (
 	"context"
+	"fmt"
 	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 )
@@ -54,12 +55,19 @@ func (s *sqlStore) ListDataByCondition(ctx context.Context,
 	}
 
 	var students []studentmodel.Student
-
-	offset := (paging.Page - 1) * paging.Limit
 	limit := paging.Limit
 
-	conditionsAndMore = conditionsAndMore + " ORDER BY id DESC LIMIT ? OFFSET ?"
-	args = append(args, limit, offset)
+	if v := paging.FakeCursor; v != "" {
+		if uid, err := common.FromBase58(v); err == nil {
+			conditionsAndMore = conditionsAndMore + fmt.Sprintf(" AND id < %d ", int(uid.GetLocalID())) + "ORDER BY id DESC LIMIT ?"
+			args = append(args, limit)
+		}
+	} else {
+		offset := (paging.Page - 1) * paging.Limit
+
+		conditionsAndMore = conditionsAndMore + " ORDER BY id DESC LIMIT ? OFFSET ?"
+		args = append(args, limit, offset)
+	}
 
 	query = db.Rebind(query + conditionsAndMore)
 	if err := db.Select(&students, query, args...); err != nil {
@@ -68,7 +76,7 @@ func (s *sqlStore) ListDataByCondition(ctx context.Context,
 
 	// count paging
 	var total int64
-	countQuery := "SELECT COUNT(*) FROM student"
+	countQuery := "SELECT COUNT(*) FROM student WHERE status in (1)"
 
 	if err := db.Get(&total, countQuery); err != nil {
 		return nil, common.ErrDB(err)
