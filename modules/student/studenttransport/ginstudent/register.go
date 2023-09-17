@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"studyGoApp/common"
 	"studyGoApp/component"
+	"studyGoApp/component/hasher"
 	"studyGoApp/modules/student/studentbiz"
 	"studyGoApp/modules/student/studentmodel"
 	"studyGoApp/modules/student/studentstorage"
@@ -20,9 +21,10 @@ func CreateStudent(appCtx component.AppContext) gin.HandlerFunc {
 		}
 
 		store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := studentbiz.NewCreateStudentBiz(store)
+		md5 := hasher.NewMd5Hash()
+		biz := studentbiz.NewRegisterBiz(store, md5)
 
-		if err := biz.CreateStudent(c.Request.Context(), &data); err != nil {
+		if err := biz.Register(c.Request.Context(), &data); err != nil {
 			panic(err)
 		}
 

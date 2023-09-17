@@ -7,19 +7,18 @@ import (
 	"studyGoApp/modules/student/studentmodel"
 )
 
-func (s *sqlStore) DetailStudent(ctx context.Context,
-	id int,
-) (*studentmodel.StudentDetail, error) {
+func (s *sqlStore) FindByStudentID(ctx context.Context,
+	studentID string) (*studentmodel.StudentDetail, error) {
 	db := s.db
 
-	var detailOfStudent studentmodel.StudentDetail
+	var result studentmodel.StudentDetail
 
-	if err := db.Get(&detailOfStudent, "SELECT * FROM student WHERE id = ?", id); err != nil {
+	if err := db.Get(&result, "SELECT * FROM student WHERE studentID = ?", studentID); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, common.ErrorNoRows
 		}
 		return nil, common.ErrDB(err)
 	}
 
-	return &detailOfStudent, nil
+	return &result, nil
 }

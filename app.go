@@ -48,12 +48,12 @@ func runServices(db *sqlx.DB, upProvider uploadprovider.UploadProvider) {
 	// upload photo
 	router.POST("/upload", ginupload.Upload(appCtx))
 
-	// CRUD
+	// CRUD student
 	students := router.Group("/students")
 	{
 		students.GET("", ginstudent.ListStudent(appCtx))
 		students.GET("/:id", ginstudent.DetailStudent(appCtx))
-		students.POST("/", ginstudent.CreateStudent(appCtx))
+		students.POST("/register", ginstudent.CreateStudent(appCtx))
 		students.PATCH("/:id", ginstudent.UpdateStudent(appCtx))
 		students.DELETE("/:id", ginstudent.SoftDeleteStudent(appCtx))
 	}

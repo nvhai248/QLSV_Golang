@@ -16,8 +16,8 @@ func (s *sqlStore) Create(ctx context.Context, data *studentmodel.StudentCreate)
 	}
 
 	if _, err := db.Exec(
-		"INSERT INTO student (name, studentID, birthday, status, avatar, cover) VALUES (?, ?, ?, ?, ?, ?)",
-		data.Name, data.StudentID, parsedTime, 1, data.Avatar, data.Cover); err != nil {
+		"INSERT INTO student (name, studentID, birthday, status, avatar, cover, password, fb_id, gg_id, salt, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		data.Name, data.StudentID, parsedTime, 1, data.Avatar, data.Cover, data.Password, data.FbId, data.GgId, data.Salt, data.Role); err != nil {
 		return common.ErrDB(err)
 	}
 

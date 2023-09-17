@@ -29,7 +29,7 @@ func (s *sqlStore) UpdateDataByID(ctx context.Context,
 		return err
 	} */
 
-	if _, err := db.Exec("UPDATE student SET name = ?, birthday = ? WHERE id = ?", data.Name, parsedTime, id); err != nil {
+	if _, err := db.Exec("UPDATE student SET name = ?, birthday = ?, password = ? WHERE id = ?", data.Name, parsedTime, data.Password, id); err != nil {
 		return common.ErrDB(err)
 	}
 

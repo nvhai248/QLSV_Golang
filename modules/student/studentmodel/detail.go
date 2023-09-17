@@ -6,6 +6,11 @@ import (
 
 type StudentDetail struct {
 	common.SQLModel `json: ", inline"`
+	Password        string         `db:"password" json:"-"`
+	FbId            string         `db:"fb_id" json:"-"`
+	GgId            string         `db:"gg_id" json:"-"`
+	Salt            string         `db:"salt" json:"-"`
+	Role            string         `db:"role" json:"-"`
 	StudentID       string         `json:"studentID" db:"studentID"`
 	Name            string         `json:"name" db:"name"`
 	Birthday        string         `json:"birthday" db:"birthday"`

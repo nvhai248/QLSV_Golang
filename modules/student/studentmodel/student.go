@@ -11,6 +11,11 @@ const EntityName = "Student"
 type Student struct {
 	common.SQLModel `json:", inline"`
 
+	Password   string         `db:"password" json:"-"`
+	FbId       string         `db:"fb_id" json:"-"`
+	GgId       string         `db:"gg_id" json:"-"`
+	Salt       string         `db:"salt" json:"-"`
+	Role       string         `db:"role" json:"-"`
 	StudentID  string         `db:"studentID" json:"studentID"`
 	Birthday   string         `db:"birthday" json:"birthday"`
 	Name       string         `db:"name" json:"name"`
@@ -24,6 +29,11 @@ func (Student) TableName() string {
 }
 
 type StudentUpdate struct {
+	Password  *string        `db:"password" json:"password"`
+	FbId      *string        `db:"fb_id" json:"fb_id"`
+	GgId      *string        `db:"gg_id" json:"gg_id"`
+	Salt      *string        `db:"salt" json:"salt"`
+	Role      *string        `db:"role" json:"role"`
 	StudentID *string        `db:"studentID" json:"studentID"`
 	Birthday  *string        `db:"birthday" json:"birthday"`
 	Name      *string        `db:"name" json:"name"`
@@ -38,6 +48,11 @@ func (StudentUpdate) TableName() string {
 type StudentCreate struct {
 	common.SQLModel `json:", inline"`
 
+	Password  string         `db:"password" json:"password"`
+	FbId      string         `db:"fb_id" json:"fb_id"`
+	GgId      string         `db:"gg_id" json:"gg_id"`
+	Salt      string         `db:"salt" json:"salt"`
+	Role      string         `db:"role" json:"role"`
 	StudentID string         `db:"studentID" json:"studentID"`
 	Birthday  string         `db:"birthday" json:"birthday"`
 	Name      string         `db:"name" json:"name"`
@@ -69,4 +84,13 @@ func (data *Student) Mask(isAdminOrOwner bool) {
 
 func (data *StudentCreate) Mask(isAdminOrOwner bool) {
 	data.GenUID(common.DbTypeStudent)
+}
+
+type StudentLogin struct {
+	StudentId string `db:"studentID" form:"studentId" json:"studentID"`
+	Password  string `db:"password" form:"password" json:"password"`
+}
+
+func (StudentLogin) TableName() string {
+	return Student{}.TableName()
 }
