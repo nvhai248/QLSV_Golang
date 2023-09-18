@@ -25,3 +25,15 @@ func (StudentDetail) TableName() string {
 func (data *StudentDetail) Mask(isAdminOrOwner bool) {
 	data.GenUID(common.DbTypeStudent)
 }
+
+func (stu *StudentDetail) GetId() int {
+	return stu.Id
+}
+
+func (stu *StudentDetail) GetStudentId() string {
+	return stu.StudentID
+}
+
+func (stu *StudentDetail) GetRole() string {
+	return stu.Role
+}

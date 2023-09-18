@@ -39,3 +39,9 @@ go get github.com/disintegration/imaging
 
 #secure id of user
 go get -u github.com/btcsuite/btcutil/base58
+
+#jwt install
+go get github.com/dgrijalva/jwt-go
+
+# for debugging 
+go install -v github.com/go-delve/delve/cmd/dlv@latest

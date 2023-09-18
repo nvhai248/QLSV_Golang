@@ -57,6 +57,7 @@ func (s *sqlStore) ListDataByCondition(ctx context.Context,
 	var students []studentmodel.Student
 	limit := paging.Limit
 
+	// updated paging
 	if v := paging.FakeCursor; v != "" {
 		if uid, err := common.FromBase58(v); err == nil {
 			conditionsAndMore = conditionsAndMore + fmt.Sprintf(" AND id < %d ", int(uid.GetLocalID())) + "ORDER BY id DESC LIMIT ?"

@@ -32,9 +32,9 @@ func ConnectToDB(dns string) *sqlx.DB {
 	return db
 }
 
-func runServices(db *sqlx.DB, upProvider uploadprovider.UploadProvider) {
+func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.UploadProvider) {
 
-	appCtx := component.NewAppContext(db, upProvider)
+	appCtx := component.NewAppContext(db, secretKey, upProvider)
 	router := gin.Default()
 
 	router.Use(middleware.Recover(appCtx))
@@ -45,15 +45,21 @@ func runServices(db *sqlx.DB, upProvider uploadprovider.UploadProvider) {
 		})
 	})
 
+	v1 := router.Group("/v1")
+
 	// upload photo
-	router.POST("/upload", ginupload.Upload(appCtx))
+	v1.POST("/upload", ginupload.Upload(appCtx))
 
 	// CRUD student
-	students := router.Group("/students")
+	// authentication and authorization with JWT
+	v1.POST("/students/register", ginstudent.CreateStudent(appCtx))
+	v1.POST("/students/login", ginstudent.Login(appCtx))
+	students := v1.Group("/students", middleware.RequireAuth(appCtx))
 	{
+		students.GET("/profile", ginstudent.GetProfile(appCtx))
+
 		students.GET("", ginstudent.ListStudent(appCtx))
 		students.GET("/:id", ginstudent.DetailStudent(appCtx))
-		students.POST("/register", ginstudent.CreateStudent(appCtx))
 		students.PATCH("/:id", ginstudent.UpdateStudent(appCtx))
 		students.DELETE("/:id", ginstudent.SoftDeleteStudent(appCtx))
 	}
@@ -78,6 +84,6 @@ func main() {
 	s3Secret := os.Getenv("S3Secret")
 	s3Domain := os.Getenv("S3Domain")
 	s3upProvider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3ApiKey, s3Secret, s3Domain)
-
-	runServices(db, s3upProvider)
+	secretKey := os.Getenv("SYSTEM_SECRET")
+	runServices(db, secretKey, s3upProvider)
 }

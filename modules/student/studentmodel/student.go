@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"studyGoApp/common"
+	"studyGoApp/component/tokenprovider"
 )
 
 const EntityName = "Student"
@@ -26,6 +27,18 @@ type Student struct {
 
 func (Student) TableName() string {
 	return "student"
+}
+
+func (stu *Student) GetId() int {
+	return stu.Id
+}
+
+func (stu *Student) GetStudentId() string {
+	return stu.StudentID
+}
+
+func (stu *Student) GetRole() string {
+	return stu.Role
 }
 
 type StudentUpdate struct {
@@ -87,10 +100,22 @@ func (data *StudentCreate) Mask(isAdminOrOwner bool) {
 }
 
 type StudentLogin struct {
-	StudentId string `db:"studentID" form:"studentId" json:"studentID"`
-	Password  string `db:"password" form:"password" json:"password"`
+	StudentId string `db:"studentID" json:"studentID" form:"studentID"`
+	Password  string `db:"password" json:"password" form:"password"`
 }
 
 func (StudentLogin) TableName() string {
 	return Student{}.TableName()
+}
+
+type Account struct {
+	AccessToken  *tokenprovider.Token `json:"access_token"`
+	RefreshToken *tokenprovider.Token `json:"refresh_token"`
+}
+
+func NewAccount(at, rt *tokenprovider.Token) *Account {
+	return &Account{
+		AccessToken:  at,
+		RefreshToken: rt,
+	}
 }
