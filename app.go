@@ -67,7 +67,7 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 
 	classes := v1.Group("/classes", middleware.RequireAuth(appCtx))
 	{
-		//classes.GET("") not done
+		classes.GET("", ginclass.ListClass(appCtx))
 		classes.GET("/:id", ginclass.FindClass(appCtx))
 		classes.POST("", ginclass.CreateClass(appCtx))
 	}

@@ -18,5 +18,19 @@ func (s sqlStore) GetStudentRegister(ctx context.Context, ids []int) (map[int]in
 	}
 
 	return result, nil
+}
 
+func (s sqlStore) GetNumberOfStudentRegisteredInClass(ctx context.Context, ids []int) (map[int]int, error) {
+	result := make(map[int]int)
+	db := s.db
+	for _, id := range ids {
+		count := 0
+		if err := db.Get(&count, "SELECT COUNT(*) FROM class_registers WHERE class_id = ?", id); err != nil {
+			return nil, common.ErrDB(err)
+		}
+
+		result[id] = count
+	}
+
+	return result, nil
 }
