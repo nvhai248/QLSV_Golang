@@ -8,6 +8,7 @@ import (
 	"studyGoApp/component"
 	"studyGoApp/component/uploadprovider"
 	"studyGoApp/middleware"
+	"studyGoApp/modules/class/classtransport/ginclass"
 	"studyGoApp/modules/student/studenttransport/ginstudent"
 	"studyGoApp/modules/upload/uploadtransport/ginupload"
 
@@ -62,6 +63,13 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		students.GET("/:id", ginstudent.DetailStudent(appCtx))
 		students.PATCH("/:id", ginstudent.UpdateStudent(appCtx))
 		students.DELETE("/:id", ginstudent.SoftDeleteStudent(appCtx))
+	}
+
+	classes := v1.Group("/classes", middleware.RequireAuth(appCtx))
+	{
+		//classes.GET("") not done
+		classes.GET("/:id", ginclass.FindClass(appCtx))
+		classes.POST("", ginclass.CreateClass(appCtx))
 	}
 
 	router.Run(":8080")
