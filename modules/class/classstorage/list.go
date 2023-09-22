@@ -19,7 +19,6 @@ func (s *sqlStore) ListClassByCondition(ctx context.Context,
 	query := "SELECT * FROM classes"
 
 	var conditionsAndMore string
-
 	// add conditions
 	i := 0
 	if len(conditions) > 0 {
@@ -54,13 +53,23 @@ func (s *sqlStore) ListClassByCondition(ctx context.Context,
 	} else {
 		offset := (paging.Page - 1) * paging.Limit
 
-		conditionsAndMore = conditionsAndMore + " ORDER BY id DESC LIMIT ? OFFSET ?"
+		conditionsAndMore = conditionsAndMore + " ORDER BY classes.id DESC LIMIT ? OFFSET ?"
 		args = append(args, limit, offset)
 	}
 
 	query = db.Rebind(query + conditionsAndMore)
 	if err := db.Select(&classes, query, args...); err != nil {
 		return nil, common.ErrDB(err)
+	}
+
+	for i := 0; i < len(classes); i++ {
+		var simpleStudent common.SimpleStudent
+		if err := db.Get(&simpleStudent, "SELECT id, studentID, name, studentID, birthday, role, created_at, updated_at FROM student WHERE id = ?",
+			classes[i].LeaderId); err != nil {
+			return nil, common.ErrDB(err)
+		}
+		simpleStudent.Mask(false)
+		classes[i].ClassMonitor = &simpleStudent
 	}
 
 	// count paging

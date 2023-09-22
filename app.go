@@ -70,6 +70,7 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		classes.GET("", ginclass.ListClass(appCtx))
 		classes.GET("/:id", ginclass.FindClass(appCtx))
 		classes.POST("", ginclass.CreateClass(appCtx))
+		classes.GET("/:id/registered_student", ginclass.GetListRegisteredStudents(appCtx))
 	}
 
 	router.Run(":8080")
@@ -94,4 +95,5 @@ func main() {
 	s3upProvider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3ApiKey, s3Secret, s3Domain)
 	secretKey := os.Getenv("SYSTEM_SECRET")
 	runServices(db, secretKey, s3upProvider)
+
 }
