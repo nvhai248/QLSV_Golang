@@ -18,6 +18,7 @@ func Login(appCtx component.AppContext) gin.HandlerFunc {
 		var loginUserData studentmodel.StudentLogin
 
 		if err := c.ShouldBindJSON(&loginUserData); err != nil {
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		db := appCtx.GetMainDBConnection()

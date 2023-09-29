@@ -9,6 +9,7 @@ import (
 	"studyGoApp/component/uploadprovider"
 	"studyGoApp/middleware"
 	"studyGoApp/modules/class/classtransport/ginclass"
+	"studyGoApp/modules/classregister/transport/ginclassregister"
 	"studyGoApp/modules/student/studenttransport/ginstudent"
 	"studyGoApp/modules/upload/uploadtransport/ginupload"
 
@@ -70,6 +71,8 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		classes.GET("", ginclass.ListClass(appCtx))
 		classes.GET("/:id", ginclass.FindClass(appCtx))
 		classes.POST("", ginclass.CreateClass(appCtx))
+		classes.DELETE("/:id/cancel_registration", ginclassregister.StudentCancelRegisterClass(appCtx))
+		classes.POST("/:id/register", ginclassregister.StudentRegisterClass(appCtx))
 		classes.GET("/:id/registered_student", ginclass.GetListRegisteredStudents(appCtx))
 	}
 
