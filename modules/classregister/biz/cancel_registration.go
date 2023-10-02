@@ -2,6 +2,8 @@ package classregisterbiz
 
 import (
 	"context"
+	"studyGoApp/common"
+	"studyGoApp/component/asyncjob"
 	classregistermodel "studyGoApp/modules/classregister/model"
 )
 
@@ -39,9 +41,27 @@ func (b *cancelRegistrationBiz) CancelRegistration(ctx context.Context, studentI
 	if err := b.store.DeleteClassRegister(ctx, studentId, classId); err != nil {
 		return classregistermodel.ErrorCannotCancelRegistration(err)
 	}
+
 	// side effect
-	_ = b.decreaseClassCountStore.DecreaseClassCount(ctx, studentId)
-	_ = b.decreaseStudentCountStore.DecreaseStudentCount(ctx, classId)
+
+	go func() {
+		defer common.AppRecover()
+		job1 := asyncjob.NewJob(func(ctx context.Context) error {
+			return b.decreaseClassCountStore.DecreaseClassCount(ctx, studentId)
+		})
+
+		job2 := asyncjob.NewJob(func(ctx context.Context) error {
+			return b.decreaseStudentCountStore.DecreaseStudentCount(ctx, classId)
+		})
+
+		_ = asyncjob.NewGroup(true, *job1, *job2).Run(ctx)
+	}()
+
+	/* go func() {
+		defer common.AppRecover()
+		_ = b.decreaseClassCountStore.DecreaseClassCount(ctx, studentId)
+		_ = b.decreaseStudentCountStore.DecreaseStudentCount(ctx, classId)
+	}() */
 
 	return nil
 }

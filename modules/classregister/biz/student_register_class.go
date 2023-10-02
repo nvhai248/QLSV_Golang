@@ -3,6 +3,7 @@ package classregisterbiz
 import (
 	"context"
 	"studyGoApp/common"
+	"studyGoApp/component/asyncjob"
 	classregistermodel "studyGoApp/modules/classregister/model"
 )
 
@@ -52,8 +53,25 @@ func (b *registerBiz) Register(ctx context.Context, data *classregistermodel.Reg
 	}
 
 	// side effect
-	_ = b.increaseClassCountStore.IncreaseClassCount(ctx, data.StudentId)
-	_ = b.increaseStudentStore.IncreaseStudentCount(ctx, data.ClassId)
+
+	go func() {
+		defer common.AppRecover()
+		job1 := asyncjob.NewJob(func(ctx context.Context) error {
+			return b.increaseClassCountStore.IncreaseClassCount(ctx, data.StudentId)
+		})
+
+		job2 := asyncjob.NewJob(func(ctx context.Context) error {
+			return b.increaseStudentStore.IncreaseStudentCount(ctx, data.ClassId)
+		})
+
+		_ = asyncjob.NewGroup(true, *job1, *job2).Run(ctx)
+	}()
+
+	/* go func() {
+		defer common.AppRecover()
+		_ = b.increaseClassCountStore.IncreaseClassCount(ctx, data.StudentId)
+		_ = b.increaseStudentStore.IncreaseStudentCount(ctx, data.ClassId)
+	}() */
 
 	return nil
 }

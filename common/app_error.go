@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -146,4 +147,11 @@ func ErrNoPermission(err error) *AppError {
 		fmt.Sprintf("You have no permissions"),
 		fmt.Sprintf("ErrNoPermission"),
 	)
+}
+
+func AppRecover() {
+	if err := recover(); err != nil {
+		log.Println("Recovered from panic:", err)
+		// Optionally, you can log the stack trace or take other recovery actions
+	}
 }
