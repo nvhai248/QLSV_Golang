@@ -16,6 +16,7 @@ type StudentDetail struct {
 	Birthday        string         `json:"birthday" db:"birthday"`
 	Avatar          *common.Image  `json:"avatar" json:"avatar"`
 	Cover           *common.Images `json:"cover" json:"cover"`
+	ClassCount      int            `json:"class_count" db:"class_count"`
 }
 
 func (StudentDetail) TableName() string {

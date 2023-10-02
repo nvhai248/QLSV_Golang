@@ -35,3 +35,23 @@ func (s *sqlStore) UpdateDataByID(ctx context.Context,
 
 	return nil
 }
+
+func (s *sqlStore) IncreaseClassCount(ctx context.Context, id int) error {
+	db := s.db
+
+	if _, err := db.Exec("UPDATE student SET class_count = class_count + 1 WHERE id = ?", id); err != nil {
+		return common.ErrDB(err)
+	}
+
+	return nil
+}
+
+func (s *sqlStore) DecreaseClassCount(ctx context.Context, id int) error {
+	db := s.db
+
+	if _, err := db.Exec("UPDATE student SET class_count = class_count - 1 WHERE id = ?", id); err != nil {
+		return common.ErrDB(err)
+	}
+
+	return nil
+}

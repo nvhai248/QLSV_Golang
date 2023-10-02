@@ -14,7 +14,7 @@ type Class struct {
 	SchoolYearEnd   int                   `json:"school_year_end" db:"school_year_end"`
 	Status          int                   `json:"status" db:"status"`
 	Semester        int                   `json:"semester" db:"semester"`
-	StudentCount    int                   `json:"class_count" db:"-"`
+	StudentCount    int                   `json:"student_count" db:"student_count"`
 	ClassMonitor    *common.SimpleStudent `json:"class_monitor" db:"-"`
 }
 

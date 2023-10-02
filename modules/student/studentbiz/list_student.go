@@ -2,7 +2,6 @@ package studentbiz
 
 import (
 	"context"
-	"log"
 	"studyGoApp/common"
 	"studyGoApp/modules/student/studentmodel"
 )
@@ -42,7 +41,7 @@ func (b *listStudentBiz) ListStudent(ctx context.Context,
 		return nil, common.ErrCannotListEntity(studentmodel.EntityName, err)
 	}
 
-	ids := make([]int, len(result))
+	/* ids := make([]int, len(result))
 
 	for i := range result {
 		ids[i] = result[i].Id
@@ -54,15 +53,15 @@ func (b *listStudentBiz) ListStudent(ctx context.Context,
 		log.Println("Cannot get class registration!", err)
 	}
 
-	/* if err != nil {
+	if err != nil {
 		return nil, common.ErrCannotListEntity(studentmodel.EntityName, err)
-	} */
+	}
 
 	if v := mapRegisterClass; v != nil {
 		for i, item := range result {
 			result[i].ClassCount = mapRegisterClass[item.Id]
 		}
-	}
+	} */
 
 	return result, nil
 }

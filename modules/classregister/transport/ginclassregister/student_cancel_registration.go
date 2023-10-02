@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"studyGoApp/common"
 	"studyGoApp/component"
+	"studyGoApp/modules/class/classstorage"
 	classregisterbiz "studyGoApp/modules/classregister/biz"
 	classregisterstorage "studyGoApp/modules/classregister/storage"
+	"studyGoApp/modules/student/studentstorage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +25,9 @@ func StudentCancelRegisterClass(appCtx component.AppContext) gin.HandlerFunc {
 		requester := ctx.MustGet(common.CurrentStudent).(common.Requester)
 
 		store := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := classregisterbiz.NewCancelRegistrationBiz(store)
+		decreaseClassCount := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		decreaseStudentCount := classstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		biz := classregisterbiz.NewCancelRegistrationBiz(store, decreaseClassCount, decreaseStudentCount)
 
 		err = biz.CancelRegistration(ctx.Request.Context(), requester.GetId(), int(uid.GetLocalID()))
 

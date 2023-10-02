@@ -22,7 +22,7 @@ type Student struct {
 	Name       string         `db:"name" json:"name"`
 	Avatar     *common.Image  `json:"avatar" json:"avatar"`
 	Cover      *common.Images `json:"cover" json:"cover"`
-	ClassCount int            `json:"class_count" db:"-"`
+	ClassCount int            `json:"class_count" db:"class_count"`
 }
 
 func (Student) TableName() string {

@@ -11,12 +11,28 @@ type RegisterStore interface {
 	FindClassRegister(ctx context.Context, studentId, classId int) (*classregistermodel.Register, error)
 }
 
-type registerBiz struct {
-	store RegisterStore
+type IncreaseStudentCountStore interface {
+	IncreaseStudentCount(ctx context.Context, id int) error
 }
 
-func NewRegisterBiz(store RegisterStore) *registerBiz {
-	return &registerBiz{store: store}
+type IncreaseClassCountStore interface {
+	IncreaseClassCount(ctx context.Context, id int) error
+}
+
+type registerBiz struct {
+	store                   RegisterStore
+	increaseStudentStore    IncreaseStudentCountStore
+	increaseClassCountStore IncreaseClassCountStore
+}
+
+func NewRegisterBiz(store RegisterStore,
+	increaseStudentStore IncreaseStudentCountStore,
+	increaseClassCountStore IncreaseClassCountStore) *registerBiz {
+	return &registerBiz{
+		store:                   store,
+		increaseStudentStore:    increaseStudentStore,
+		increaseClassCountStore: increaseClassCountStore,
+	}
 }
 
 func (b *registerBiz) Register(ctx context.Context, data *classregistermodel.Register) error {
@@ -34,6 +50,10 @@ func (b *registerBiz) Register(ctx context.Context, data *classregistermodel.Reg
 	if err := b.store.CreateClassRegister(ctx, data); err != nil {
 		return common.ErrCannotCreateEntity(classregistermodel.EntityName, err)
 	}
+
+	// side effect
+	_ = b.increaseClassCountStore.IncreaseClassCount(ctx, data.StudentId)
+	_ = b.increaseStudentStore.IncreaseStudentCount(ctx, data.ClassId)
 
 	return nil
 }
