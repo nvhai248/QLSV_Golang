@@ -12,6 +12,8 @@ import (
 	"studyGoApp/modules/classregister/transport/ginclassregister"
 	"studyGoApp/modules/student/studenttransport/ginstudent"
 	"studyGoApp/modules/upload/uploadtransport/ginupload"
+	"studyGoApp/pubsub/pblocal"
+	"studyGoApp/subscriber"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -36,7 +38,11 @@ func ConnectToDB(dns string) *sqlx.DB {
 
 func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.UploadProvider) {
 
-	appCtx := component.NewAppContext(db, secretKey, upProvider)
+	appCtx := component.NewAppContext(db, secretKey, upProvider, pblocal.NewPubSub())
+
+	// call pubsub
+	subscriber.Setup(appCtx)
+
 	router := gin.Default()
 
 	router.Use(middleware.Recover(appCtx))

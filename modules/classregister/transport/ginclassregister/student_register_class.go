@@ -4,11 +4,9 @@ import (
 	"net/http"
 	"studyGoApp/common"
 	"studyGoApp/component"
-	"studyGoApp/modules/class/classstorage"
 	classregisterbiz "studyGoApp/modules/classregister/biz"
 	classregistermodel "studyGoApp/modules/classregister/model"
 	classregisterstorage "studyGoApp/modules/classregister/storage"
-	"studyGoApp/modules/student/studentstorage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,9 +28,9 @@ func StudentRegisterClass(appCtx component.AppContext) gin.HandlerFunc {
 		}
 
 		store := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		increaseClassCount := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		increaseStudentCount := classstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := classregisterbiz.NewRegisterBiz(store, increaseStudentCount, increaseClassCount)
+		/* increaseClassCount := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		increaseStudentCount := classstorage.NewSQLStore(appCtx.GetMainDBConnection()) */
+		biz := classregisterbiz.NewRegisterBiz(store, appCtx.GetPubSub())
 
 		err = biz.Register(ctx.Request.Context(), data)
 

@@ -3,8 +3,8 @@ package classregisterbiz
 import (
 	"context"
 	"studyGoApp/common"
-	"studyGoApp/component/asyncjob"
 	classregistermodel "studyGoApp/modules/classregister/model"
+	"studyGoApp/pubsub"
 )
 
 type RegisterStore interface {
@@ -12,27 +12,30 @@ type RegisterStore interface {
 	FindClassRegister(ctx context.Context, studentId, classId int) (*classregistermodel.Register, error)
 }
 
-type IncreaseStudentCountStore interface {
+/* type IncreaseStudentCountStore interface {
 	IncreaseStudentCount(ctx context.Context, id int) error
 }
 
 type IncreaseClassCountStore interface {
 	IncreaseClassCount(ctx context.Context, id int) error
-}
+} */
 
 type registerBiz struct {
-	store                   RegisterStore
-	increaseStudentStore    IncreaseStudentCountStore
-	increaseClassCountStore IncreaseClassCountStore
+	store RegisterStore
+	/* increaseStudentStore    IncreaseStudentCountStore
+	increaseClassCountStore IncreaseClassCountStore */
+	pubsub pubsub.Pubsub
 }
 
 func NewRegisterBiz(store RegisterStore,
-	increaseStudentStore IncreaseStudentCountStore,
-	increaseClassCountStore IncreaseClassCountStore) *registerBiz {
+	/* increaseStudentStore IncreaseStudentCountStore,
+	increaseClassCountStore IncreaseClassCountStore, */
+	pubsub pubsub.Pubsub) *registerBiz {
 	return &registerBiz{
-		store:                   store,
-		increaseStudentStore:    increaseStudentStore,
-		increaseClassCountStore: increaseClassCountStore,
+		store: store,
+		/* increaseStudentStore:    increaseStudentStore,
+		increaseClassCountStore: increaseClassCountStore, */
+		pubsub: pubsub,
 	}
 }
 
@@ -53,8 +56,12 @@ func (b *registerBiz) Register(ctx context.Context, data *classregistermodel.Reg
 	}
 
 	// side effect
+	// new solution: use pub/sub
 
-	go func() {
+	b.pubsub.Publish(ctx, common.TopicStudentRegisterToTheClass, pubsub.NewMessage(data))
+
+	// async job
+	/* go func() {
 		defer common.AppRecover()
 		job1 := asyncjob.NewJob(func(ctx context.Context) error {
 			return b.increaseClassCountStore.IncreaseClassCount(ctx, data.StudentId)
@@ -65,7 +72,7 @@ func (b *registerBiz) Register(ctx context.Context, data *classregistermodel.Reg
 		})
 
 		_ = asyncjob.NewGroup(true, *job1, *job2).Run(ctx)
-	}()
+	}() */
 
 	/* go func() {
 		defer common.AppRecover()
