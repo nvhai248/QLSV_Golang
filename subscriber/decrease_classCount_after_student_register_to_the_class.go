@@ -7,8 +7,8 @@ import (
 	"studyGoApp/modules/student/studentstorage"
 )
 
-func IncreaseClassCountAfterStudentRegisterToTheClass(appCtx component.AppContext, ctx context.Context) {
-	c, _ := appCtx.GetPubSub().Subscribe(ctx, common.TopicStudentRegisterToTheClass)
+func DecreaseClassCountAfterStudentRegisterToTheClass(appCtx component.AppContext, ctx context.Context) {
+	c, _ := appCtx.GetPubSub().Subscribe(ctx, common.TopicStudentCancelRegistration)
 
 	store := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
 
@@ -17,7 +17,7 @@ func IncreaseClassCountAfterStudentRegisterToTheClass(appCtx component.AppContex
 		for {
 			mgs := <-c
 			registerData := mgs.Data().(HasStudentId)
-			_ = store.IncreaseClassCount(ctx, registerData.GetStudentId())
+			_ = store.DecreaseClassCount(ctx, registerData.GetStudentId())
 		}
 	}()
 }

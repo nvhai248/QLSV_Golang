@@ -2,15 +2,22 @@ package classregistermodel
 
 import (
 	"studyGoApp/common"
-	"time"
 )
 
 type Register struct {
-	StudentId int        `db:"student_id" json:"student_id"`
-	ClassId   int        `db:"class_id" json:"class_id"`
-	CreatedAt *time.Time `db:"created_at" json:"created_at"`
+	StudentId int    `db:"student_id" json:"student_id"`
+	ClassId   int    `db:"class_id" json:"class_id"`
+	CreatedAt string `db:"created_at" json:"created_at"`
 
 	Students *common.SimpleStudent `json:"students"`
+}
+
+func (r *Register) GetStudentId() int {
+	return r.StudentId
+}
+
+func (r *Register) GetClassId() int {
+	return r.ClassId
 }
 
 func (r Register) TableName() string {
@@ -26,6 +33,7 @@ func ErrorIsRegistered(err error) *common.AppError {
 		"ClassRegistered",
 	)
 }
+
 func ErrorCannotCancelRegistration(err error) *common.AppError {
 	return common.NewCustomError(
 		err,

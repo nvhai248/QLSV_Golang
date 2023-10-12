@@ -104,5 +104,4 @@ func main() {
 	s3upProvider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3ApiKey, s3Secret, s3Domain)
 	secretKey := os.Getenv("SYSTEM_SECRET")
 	runServices(db, secretKey, s3upProvider)
-
 }

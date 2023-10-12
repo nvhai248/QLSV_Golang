@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"studyGoApp/common"
 	"studyGoApp/component"
-	"studyGoApp/modules/class/classstorage"
 	classregisterbiz "studyGoApp/modules/classregister/biz"
+	classregistermodel "studyGoApp/modules/classregister/model"
 	classregisterstorage "studyGoApp/modules/classregister/storage"
-	"studyGoApp/modules/student/studentstorage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,12 +23,17 @@ func StudentCancelRegisterClass(appCtx component.AppContext) gin.HandlerFunc {
 
 		requester := ctx.MustGet(common.CurrentStudent).(common.Requester)
 
-		store := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		decreaseClassCount := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		decreaseStudentCount := classstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := classregisterbiz.NewCancelRegistrationBiz(store, decreaseClassCount, decreaseStudentCount)
+		data := &classregistermodel.Register{
+			StudentId: requester.GetId(),
+			ClassId:   int(uid.GetLocalID()),
+		}
 
-		err = biz.CancelRegistration(ctx.Request.Context(), requester.GetId(), int(uid.GetLocalID()))
+		store := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		/* decreaseClassCount := studentstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		decreaseStudentCount := classstorage.NewSQLStore(appCtx.GetMainDBConnection()) */
+		biz := classregisterbiz.NewCancelRegistrationBiz(store, appCtx.GetPubSub())
+
+		err = biz.CancelRegistration(ctx.Request.Context(), data)
 
 		if err != nil {
 			panic(err)
