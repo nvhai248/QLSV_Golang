@@ -27,7 +27,7 @@ func RunDecreaseStudentCountAfterStudentRegisterToTheClass(appCtx component.AppC
 	store := classstorage.NewSQLStore(appCtx.GetMainDBConnection())
 
 	return consumerJob{
-		Title: "Increase StudentCount after student register to the class",
+		Title: "Decrease StudentCount after student cancel registration!",
 		Hld: func(ctx context.Context, message *pubsub.Message) error {
 			registerData := message.Data().(HasClassId)
 			return store.DecreaseStudentCount(ctx, registerData.GetClassId())
