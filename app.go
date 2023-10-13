@@ -41,7 +41,11 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 	appCtx := component.NewAppContext(db, secretKey, upProvider, pblocal.NewPubSub())
 
 	// call pubsub
-	subscriber.Setup(appCtx)
+	//subscriber.Setup(appCtx)
+
+	if err := subscriber.NewEngine(appCtx).Start(); err != nil {
+		log.Fatal(err)
+	}
 
 	router := gin.Default()
 

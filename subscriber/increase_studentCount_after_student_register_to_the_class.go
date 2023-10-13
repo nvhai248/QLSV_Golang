@@ -5,6 +5,7 @@ import (
 	"studyGoApp/common"
 	"studyGoApp/component"
 	"studyGoApp/modules/class/classstorage"
+	"studyGoApp/pubsub"
 )
 
 func IncreaseStudentCountAfterStudentRegisterToTheClass(appCtx component.AppContext, ctx context.Context) {
@@ -20,4 +21,16 @@ func IncreaseStudentCountAfterStudentRegisterToTheClass(appCtx component.AppCont
 			_ = store.IncreaseStudentCount(ctx, registerData.GetClassId())
 		}
 	}()
+}
+
+func RunIncreaseStudentCountAfterStudentRegisterToTheClass(appCtx component.AppContext) consumerJob {
+	store := classstorage.NewSQLStore(appCtx.GetMainDBConnection())
+
+	return consumerJob{
+		Title: "Increase StudentCount after student register to the class",
+		Hld: func(ctx context.Context, message *pubsub.Message) error {
+			registerData := message.Data().(HasClassId)
+			return store.IncreaseStudentCount(ctx, registerData.GetClassId())
+		},
+	}
 }
