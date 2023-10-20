@@ -24,15 +24,22 @@ I used microservices architecture for this project to simple scale up.
 
 1. Clone the repository:
 
-```git clone https://github.com/nvhai248/QLSV_Golang```
+```
+git clone https://github.com/nvhai248/QLSV_Golang
+```
 
 2. Install dependencies (Optional if vendor folder included):
 
-```go get -u all```
+```
+go get -u all
+```
 
 3. Start the server:
 
-```go run ./app.go```
+```
+go run ./app.go
+```
+
 ## Contact
 
 If you have any questions or suggestions, please feel free to contact us at nvhai2408@gmail.com
