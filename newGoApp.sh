@@ -45,3 +45,6 @@ go get github.com/dgrijalva/jwt-go
 
 # for debugging 
 go install -v github.com/go-delve/delve/cmd/dlv@latest
+
+# socket.io
+go get github.com/googollee/go-socket.io

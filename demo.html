@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Socket IO</title>
+
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+    <script type="module">
+      import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+      const socket = io("http://127.0.0.1:8080/", { transport: ["websocket"] });
+
+      socket.on("connect", function () {
+        console.log("Connected to server");
+      });
+
+      socket.on("your profile", function (user) {
+        console.log("Received user profile:", user);
+      });
+
+      socket.on("notice", function (data) {
+        console.log("Received notice:", data);
+      });
+
+      // Define the functions outside of the click event listeners
+      function authenticate() {
+        var token = prompt("Enter your token:");
+        socket.emit("authenticate", token);
+      }
+
+      function test() {
+        socket.emit("test", "Test message from the client");
+      }
+
+      function sendNotice() {
+        var name = prompt("Enter your name:");
+        var age = parseInt(prompt("Enter your age:"));
+        var person = { name: name, age: age };
+        socket.emit("notice", person);
+      }
+
+      // Attach the click event listeners to the buttons
+      $("#auth").click(authenticate);
+      $("#test").click(test);
+      $("#sendNotice").click(sendNotice);
+    </script>
+  </head>
+  <body>
+    <h1>Socket.IO Example</h1>
+    <button id="auth">Authenticate</button>
+    <button id="test">Send Test Message</button>
+    <button id="sendNotice">Send Notice</button>
+  </body>
+</html>

@@ -13,6 +13,7 @@ import (
 	"studyGoApp/modules/student/studenttransport/ginstudent"
 	"studyGoApp/modules/upload/uploadtransport/ginupload"
 	"studyGoApp/pubsub/pblocal"
+	"studyGoApp/skio"
 	"studyGoApp/subscriber"
 
 	"github.com/gin-gonic/gin"
@@ -57,6 +58,7 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		})
 	})
 
+	//router.StaticFile("/demo/", "./demo.html")
 	v1 := router.Group("/v1")
 
 	// upload photo
@@ -86,6 +88,11 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		classes.GET("/:id/registered_student", ginclass.GetListRegisteredStudents(appCtx))
 	}
 
+	//startSocketIoServer(router, appCtx)
+	if err := skio.NewEngine().Run(appCtx, router); err != nil {
+		log.Fatalln("Failed to start server: ", err)
+	}
+
 	router.Run(":8080")
 }
 
@@ -109,3 +116,105 @@ func main() {
 	secretKey := os.Getenv("SYSTEM_SECRET")
 	runServices(db, secretKey, s3upProvider)
 }
+
+/* func startSocketIoServer(engine *gin.Engine, appCtx component.AppContext) {
+
+	engine.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:5500") // Set the allowed origin(s)
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests (OPTIONS)
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+		} else {
+			c.Next()
+		}
+	})
+
+	// Create a new Socket.IO server
+	server := socketio.NewServer(nil)
+
+	// Handle connections
+	server.OnConnect("/", func(s socketio.Conn) error {
+		// Set up CORS
+		s.SetContext("")
+		s.RemoteHeader().Set("Access-Control-Allow-Origin", "http://127.0.0.1:5500")
+
+		// Log the connection
+		fmt.Println("connected:", s.ID(), " IP:", s.RemoteAddr())
+
+		return nil
+	})
+
+	// Handle errors
+	server.OnError("/", func(s socketio.Conn, e error) {
+		fmt.Println("meet error: ", e)
+	})
+
+	// Handle disconnections
+	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		fmt.Println("Closed: ", reason)
+		// Remove socket from the socket engine (from app context) if necessary
+	})
+
+	// Handle authentication
+	server.OnEvent("/", "authenticate", func(s socketio.Conn, token string) {
+		// Implement your authentication logic here
+		db := appCtx.GetMainDBConnection()
+		store := studentstorage.NewSQLStore(db)
+
+		tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
+
+		payload, err := tokenProvider.Validate(token)
+
+		if err != nil {
+			s.Emit("authentication failed", err.Error())
+			s.Close()
+			return
+		}
+
+		user, err := store.DetailStudent(context.Background(), payload.UserId)
+
+		if err != nil {
+			s.Emit("authentication failed", err.Error())
+			s.Close()
+			return
+		}
+
+		if user.Status == 0 {
+			s.Emit("authentication failed", errors.New("you had been banned/deleted"))
+			s.Close()
+			return
+		}
+
+		s.Emit("your profile", user)
+	})
+
+	// Handle test event
+	server.OnEvent("/", "test", func(s socketio.Conn, msg string) {
+		log.Println(msg)
+	})
+
+	// Define a Person struct
+	type Person struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+	}
+
+	// Handle notice event
+	server.OnEvent("/", "notice", func(s socketio.Conn, p Person) {
+		fmt.Println("server received notice:", p.Name, p.Age)
+		p.Age = 33
+		s.Emit("notice", p)
+	})
+
+	// Start the Socket.IO server
+	go server.Serve()
+
+	// Handle HTTP requests for the Socket.IO server
+	engine.GET("/socket.io/*any", gin.WrapH(server))
+	engine.POST("/socket.io/*any", gin.WrapH(server))
+}
+*/
