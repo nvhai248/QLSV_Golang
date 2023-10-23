@@ -7,6 +7,7 @@ import (
 	"studyGoApp/component"
 	"studyGoApp/component/asyncjob"
 	"studyGoApp/pubsub"
+	"studyGoApp/skio"
 )
 
 type consumerJob struct {
@@ -15,11 +16,12 @@ type consumerJob struct {
 }
 
 type consumerEngine struct {
-	appCtx component.AppContext
+	appCtx   component.AppContext
+	rtEngine skio.RealtimeEngine
 }
 
-func NewEngine(appContext component.AppContext) *consumerEngine {
-	return &consumerEngine{appCtx: appContext}
+func NewEngine(appContext component.AppContext, rtEngine skio.RealtimeEngine) *consumerEngine {
+	return &consumerEngine{appCtx: appContext, rtEngine: rtEngine}
 }
 
 func (engine *consumerEngine) Start() error {

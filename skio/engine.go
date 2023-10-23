@@ -10,6 +10,7 @@ import (
 	"studyGoApp/component"
 	"studyGoApp/component/tokenprovider/jwt"
 	"studyGoApp/modules/student/studentstorage"
+	"studyGoApp/modules/student/studenttransport/skstudent"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -94,6 +95,43 @@ func (engine *rtEngine) EmitToUser(userId int, key string, data interface{}) err
 	return nil
 }
 
+func (en *rtEngine) authenticationForClientBySk(ctx component.AppContext, engine *gin.Engine) func(s socketio.Conn, token string) {
+	return func(s socketio.Conn, token string) {
+		// Implement your authentication logic here
+		db := ctx.GetMainDBConnection()
+		store := studentstorage.NewSQLStore(db)
+
+		tokenProvider := jwt.NewTokenJWTProvider(ctx.SecretKey())
+
+		payload, err := tokenProvider.Validate(token)
+
+		if err != nil {
+			s.Emit("authentication failed", err.Error())
+			s.Close()
+			return
+		}
+
+		user, err := store.DetailStudent(context.Background(), payload.UserId)
+
+		if err != nil {
+			s.Emit("authentication failed", err.Error())
+			s.Close()
+			return
+		}
+
+		if user.Status == 0 {
+			s.Emit("authentication failed", errors.New("you had been banned/deleted"))
+			s.Close()
+			return
+		}
+
+		appSck := NewAppSocket(s, user)
+		en.saveAppSocket(user.Id, *appSck)
+
+		s.Emit("your profile", user)
+	}
+}
+
 func (en *rtEngine) Run(ctx component.AppContext, engine *gin.Engine) error {
 	engine.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", os.Getenv("CLIENTS")) // Set the allowed origin(s)
@@ -136,41 +174,11 @@ func (en *rtEngine) Run(ctx component.AppContext, engine *gin.Engine) error {
 		// Remove socket from the socket engine (from app context) if necessary
 	})
 
+	// setup
+	server.OnEvent("/", "", skstudent.OnStudentUpdateLocation(ctx))
+
 	// Handle authentication
-	server.OnEvent("/", "authenticate", func(s socketio.Conn, token string) {
-		// Implement your authentication logic here
-		db := ctx.GetMainDBConnection()
-		store := studentstorage.NewSQLStore(db)
-
-		tokenProvider := jwt.NewTokenJWTProvider(ctx.SecretKey())
-
-		payload, err := tokenProvider.Validate(token)
-
-		if err != nil {
-			s.Emit("authentication failed", err.Error())
-			s.Close()
-			return
-		}
-
-		user, err := store.DetailStudent(context.Background(), payload.UserId)
-
-		if err != nil {
-			s.Emit("authentication failed", err.Error())
-			s.Close()
-			return
-		}
-
-		if user.Status == 0 {
-			s.Emit("authentication failed", errors.New("you had been banned/deleted"))
-			s.Close()
-			return
-		}
-
-		appSck := NewAppSocket(s, user)
-		en.saveAppSocket(user.Id, *appSck)
-
-		s.Emit("your profile", user)
-	})
+	server.OnEvent("/", "location", en.authenticationForClientBySk(ctx, engine))
 
 	// Handle test event
 	server.OnEvent("/", "test", func(s socketio.Conn, msg string) {

@@ -14,9 +14,32 @@
       import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
       const socket = io("http://127.0.0.1:8080/", { transport: ["websocket"] });
 
+      var lockTimer = null;
+
+      // Define the functions outside of the click event listeners
+      function authenticate() {
+        var token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJ_faWQiOjM2LCJyb2xlIjoidXNlciJ9LCJleHAiOjE2OTgzOTYzNDcsImlhdCI6MTY5Nzc5MTU0N30.VoVu93cDyHxUEg9lXvQCZi6EB_tM78EkL2dnrO323j4`;
+        socket.emit("authenticate", token);
+      }
+
+      function test() {
+        socket.emit("test", "Test message from the client");
+      }
+
+      function sendNotice() {
+        var name = "Hai";
+        var age = 38;
+        var person = { name: name, age: age };
+        socket.emit("notice", person);
+      }
+
       socket.on("connect", function () {
         console.log("Connected to server");
       });
+
+      authenticate();
+      test();
+      sendNotice();
 
       socket.on("your profile", function (user) {
         console.log("Received user profile:", user);
@@ -26,33 +49,24 @@
         console.log("Received notice:", data);
       });
 
-      // Define the functions outside of the click event listeners
-      function authenticate() {
-        var token = prompt("Enter your token:");
-        socket.emit("authenticate", token);
-      }
+      socket.on("authentication failed", function (data) {
+        console.log("Received notice:", data);
+      });
 
-      function test() {
-        socket.emit("test", "Test message from the client");
-      }
+      socket.on("authenticate", () => {
+        if (lockTimer) {
+          clearInterval(lockTimer);
+        }
 
-      function sendNotice() {
-        var name = prompt("Enter your name:");
-        var age = parseInt(prompt("Enter your age:"));
-        var person = { name: name, age: age };
-        socket.emit("notice", person);
-      }
+        lockTimer = setInterval(() => {
+          socket.emit("location", { lat: 10.23132, lng: 106.1231341 });
+        }, 3000);
+      });
 
-      // Attach the click event listeners to the buttons
-      $("#auth").click(authenticate);
-      $("#test").click(test);
-      $("#sendNotice").click(sendNotice);
+      console.log("Connection established");
     </script>
   </head>
   <body>
     <h1>Socket.IO Example</h1>
-    <button id="auth">Authenticate</button>
-    <button id="test">Send Test Message</button>
-    <button id="sendNotice">Send Notice</button>
   </body>
 </html>

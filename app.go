@@ -41,14 +41,20 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 
 	appCtx := component.NewAppContext(db, secretKey, upProvider, pblocal.NewPubSub())
 
+	router := gin.Default()
+
 	// call pubsub
 	//subscriber.Setup(appCtx)
 
-	if err := subscriber.NewEngine(appCtx).Start(); err != nil {
-		log.Fatal(err)
+	rtEngine := skio.NewEngine()
+
+	if err := rtEngine.Run(appCtx, router); err != nil {
+		log.Fatalln("Failed to start server: ", err)
 	}
 
-	router := gin.Default()
+	if err := subscriber.NewEngine(appCtx, rtEngine).Start(); err != nil {
+		log.Fatal(err)
+	}
 
 	router.Use(middleware.Recover(appCtx))
 
@@ -89,9 +95,6 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 	}
 
 	//startSocketIoServer(router, appCtx)
-	if err := skio.NewEngine().Run(appCtx, router); err != nil {
-		log.Fatalln("Failed to start server: ", err)
-	}
 
 	router.Run(":8080")
 }
