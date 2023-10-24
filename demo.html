@@ -3,70 +3,96 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Test Socket IO</title>
-
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.js"
-      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-      crossorigin="anonymous"
-    ></script>
-    <script type="module">
-      import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
-      const socket = io("http://127.0.0.1:8080/", { transport: ["websocket"] });
-
-      var lockTimer = null;
-
-      // Define the functions outside of the click event listeners
-      function authenticate() {
-        var token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJ_faWQiOjM2LCJyb2xlIjoidXNlciJ9LCJleHAiOjE2OTgzOTYzNDcsImlhdCI6MTY5Nzc5MTU0N30.VoVu93cDyHxUEg9lXvQCZi6EB_tM78EkL2dnrO323j4`;
-        socket.emit("authenticate", token);
-      }
-
-      function test() {
-        socket.emit("test", "Test message from the client");
-      }
-
-      function sendNotice() {
-        var name = "Hai";
-        var age = 38;
-        var person = { name: name, age: age };
-        socket.emit("notice", person);
-      }
-
-      socket.on("connect", function () {
-        console.log("Connected to server");
-      });
-
-      authenticate();
-      test();
-      sendNotice();
-
-      socket.on("your profile", function (user) {
-        console.log("Received user profile:", user);
-      });
-
-      socket.on("notice", function (data) {
-        console.log("Received notice:", data);
-      });
-
-      socket.on("authentication failed", function (data) {
-        console.log("Received notice:", data);
-      });
-
-      socket.on("authenticate", () => {
-        if (lockTimer) {
-          clearInterval(lockTimer);
-        }
-
-        lockTimer = setInterval(() => {
-          socket.emit("location", { lat: 10.23132, lng: 106.1231341 });
-        }, 3000);
-      });
-
-      console.log("Connection established");
-    </script>
+    <title>Socket.IO Example</title>
   </head>
   <body>
     <h1>Socket.IO Example</h1>
+
+    <button id="connectButton">Connect</button>
+    <button id="testButton" disabled>Test</button>
+    <button id="noticeButton" disabled>Notice</button>
+    <button id="startLocationButton" disabled>Start Location</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script>
+      const socket = io("http://localhost:8080", ["websocket"]); // Đảm bảo địa chỉ máy chủ và cổng phù hợp với máy chủ Socket.IO của bạn
+      let authenticated = false; // Xác định xem đã xác thực hay chưa
+
+      // Khi nút "Connect" được nhấn
+      $("#connectButton").click(function () {
+        const token = prompt("Enter your token"); // Yêu cầu nhập token
+
+        // Gửi token cho server để xác thực
+        socket.emit("authentication", token);
+      });
+
+      // Khi kết nối thành công
+      socket.on("connect", function () {
+        console.log("Connected to server");
+        authenticated = true;
+        $("#testButton").prop("disabled", false);
+        $("#noticeButton").prop("disabled", false);
+        $("#startLocationButton").prop("disabled", false);
+      });
+
+      // Khi xác thực thành công
+      socket.on("your profile", function (user) {
+        console.log("Authentication successful. User:", user);
+      });
+
+      // Khi xác thực thất bại
+      socket.on("authentication failed", function (error) {
+        console.log("Authentication failed:", error);
+      });
+
+      socket.on("error", function (error) {
+        console.log("error:", error);
+      });
+
+      socket.on("notice", function (mgs) {
+        console.log("mgs:", mgs);
+      });
+
+      // Khi nút "Test" được nhấn
+      $("#testButton").click(function () {
+        if (authenticated) {
+          // Gửi sự kiện "test" cho server
+          socket.emit("test", "Test message from client");
+        } else {
+          console.log("Not authenticated. Please connect first.");
+        }
+      });
+
+      // Khi nút "Notice" được nhấn
+      $("#noticeButton").click(function () {
+        if (authenticated) {
+          const name = prompt("Enter your name:");
+          const age = parseInt(prompt("Enter your age:"));
+          const person = { name: name, age: age };
+          // Gửi sự kiện "notice" với thông tin cá nhân cho server
+          socket.emit("notice", person);
+        } else {
+          console.log("Not authenticated. Please connect first.");
+        }
+      });
+
+      // Khi nút "Start Location" được nhấn
+      $("#startLocationButton").click(function () {
+        if (authenticated) {
+          // Tạo và gửi sự kiện "location" sau mỗi 3 giây
+          const locationUpdateInterval = 3000; // 3 giây
+          setInterval(function () {
+            const location = {
+              latitude: Math.random() * 90,
+              longitude: Math.random() * 180,
+            };
+            socket.emit("location", location);
+          }, locationUpdateInterval);
+        } else {
+          console.log("Not authenticated. Please connect first.");
+        }
+      });
+    </script>
   </body>
 </html>
