@@ -19,6 +19,7 @@ I used microservices architecture for this project to simple scale up.
 * Provide APIs for student management web applications based on RESTful API
 * Authenticate and authorized by `jwt`
 * Message broker by `pubsub` to improve the performance when a lot of students register to the class and vice versa
+* Build in `docker` (url: https://hub.docker.com/repository/docker/nvhai248/student-management/general)
 
 ## Usage
 
