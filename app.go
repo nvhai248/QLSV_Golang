@@ -94,8 +94,6 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		classes.GET("/:id/registered_student", ginclass.GetListRegisteredStudents(appCtx))
 	}
 
-	//startSocketIoServer(router, appCtx)
-
 	router.Run(":8080")
 }
 
