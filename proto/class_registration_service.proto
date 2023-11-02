@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package demo;
+
+option go_package = "proto/";
+
+message ClassRegistrationStatRequest {
+    repeated int32 classIds = 1;
+}
+
+message ClassRegistrationStatResponse {
+    map<int32, int32> result = 1;
+}
+
+service ClassRegistrationService {
+    rpc GetClassRegistrationStat(ClassRegistrationStatRequest) returns (ClassRegistrationStatResponse) {
+    };
+}

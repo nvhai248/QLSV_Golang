@@ -2,8 +2,10 @@ package classbiz
 
 import (
 	"context"
+	"log"
 	"studyGoApp/common"
 	"studyGoApp/modules/class/classmodel"
+	"studyGoApp/modules/student/studentmodel"
 )
 
 type ListClassStore interface {
@@ -39,7 +41,9 @@ func (b *listClassBiz) ListClass(ctx context.Context,
 		return nil, common.ErrCannotListEntity(classmodel.EntityName, err)
 	}
 
-	/* ids := make([]int, len(result))
+	// Call the function in classregistration model
+
+	ids := make([]int, len(result))
 
 	for i := range result {
 		ids[i] = result[i].Id
@@ -59,7 +63,7 @@ func (b *listClassBiz) ListClass(ctx context.Context,
 		for i, item := range result {
 			result[i].StudentCount = mapRegisterClass[item.Id]
 		}
-	} */
+	}
 
 	return result, nil
 }

@@ -3,15 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"studyGoApp/component"
 	"studyGoApp/component/uploadprovider"
 	"studyGoApp/middleware"
 	"studyGoApp/modules/class/classtransport/ginclass"
+	classregistrationgrpc "studyGoApp/modules/classregister/storage/grpc"
 	"studyGoApp/modules/classregister/transport/ginclassregister"
 	"studyGoApp/modules/student/studenttransport/ginstudent"
 	"studyGoApp/modules/upload/uploadtransport/ginupload"
+	"studyGoApp/proto"
 	"studyGoApp/pubsub/pblocal"
 	"studyGoApp/skio"
 	"studyGoApp/subscriber"
@@ -20,6 +23,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 )
 
 func ConnectToDB(dns string) *sqlx.DB {
@@ -56,6 +60,8 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		log.Fatal(err)
 	}
 
+	fmt.Println("...Hello Client...")
+
 	router.Use(middleware.Recover(appCtx))
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -63,6 +69,13 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 			"message": "ping 5555",
 		})
 	})
+
+	opts := grpc.WithInsecure()
+	cc, err := grpc.Dial("localhost:50051", opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cc.Close()
 
 	//router.StaticFile("/demo/", "./demo.html")
 	v1 := router.Group("/v1")
@@ -86,13 +99,33 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 
 	classes := v1.Group("/classes", middleware.RequireAuth(appCtx))
 	{
-		classes.GET("", ginclass.ListClass(appCtx))
+		classes.GET("", ginclass.ListClass(appCtx, cc))
 		classes.GET("/:id", ginclass.FindClass(appCtx))
 		classes.POST("", ginclass.CreateClass(appCtx))
 		classes.DELETE("/:id/cancel_registration", ginclassregister.StudentCancelRegisterClass(appCtx))
 		classes.POST("/:id/register", ginclassregister.StudentRegisterClass(appCtx))
 		classes.GET("/:id/registered_student", ginclass.GetListRegisteredStudents(appCtx))
 	}
+
+	// Create a listener on TCP port
+	address := "0.0.0.0:50051"
+	lis, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatalln("Failed to listen:", err)
+	}
+
+	// Create a gRPC server object
+	s := grpc.NewServer()
+	// Attach the Greeter service to the server
+	proto.RegisterClassRegistrationServiceServer(s, classregistrationgrpc.NewgRPCServer(db))
+
+	go func() {
+		// Serve gRPC Server
+		log.Println("Serving gRPC on ", address)
+		if err := s.Serve(lis); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	router.Run(":8080")
 }
@@ -115,6 +148,7 @@ func main() {
 	s3Domain := os.Getenv("S3Domain")
 	s3upProvider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3ApiKey, s3Secret, s3Domain)
 	secretKey := os.Getenv("SYSTEM_SECRET")
+
 	runServices(db, secretKey, s3upProvider)
 }
 

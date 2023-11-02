@@ -6,12 +6,14 @@ import (
 	"studyGoApp/component"
 	"studyGoApp/modules/class/classbiz"
 	"studyGoApp/modules/class/classstorage"
-	classregisterstorage "studyGoApp/modules/classregister/storage"
+	classgrpcclient "studyGoApp/modules/class/classstorage/grpcclient"
+	"studyGoApp/proto"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
-func ListClass(appCtx component.AppContext) gin.HandlerFunc {
+func ListClass(appCtx component.AppContext, cc *grpc.ClientConn) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var paging common.Paging
 
@@ -23,7 +25,8 @@ func ListClass(appCtx component.AppContext) gin.HandlerFunc {
 		paging.Fulfill()
 
 		store := classstorage.NewSQLStore(appCtx.GetMainDBConnection())
-		classRegisterStore := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
+		classRegisterStore := classgrpcclient.NewgRPCClient(proto.NewClassRegistrationServiceClient(cc))
+		//classRegisterStore := classregisterstorage.NewSQLStore(appCtx.GetMainDBConnection())
 		biz := classbiz.NewListClassBiz(store, classRegisterStore)
 		data, err := biz.ListClass(c.Request.Context(), &paging)
 
