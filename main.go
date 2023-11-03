@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"studyGoApp/common"
 	"studyGoApp/component"
 	"studyGoApp/component/uploadprovider"
 	"studyGoApp/middleware"
@@ -87,7 +88,10 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 	// authentication and authorization with JWT
 	v1.POST("/students/register", ginstudent.CreateStudent(appCtx))
 	v1.POST("/students/login", ginstudent.Login(appCtx))
-	students := v1.Group("/students", middleware.RequireAuth(appCtx))
+
+	MainStudent(appCtx, v1)
+
+	/* students := v1.Group("/students", middleware.RequireAuth(appCtx))
 	{
 		students.GET("/profile", ginstudent.GetProfile(appCtx))
 
@@ -95,6 +99,14 @@ func runServices(db *sqlx.DB, secretKey string, upProvider uploadprovider.Upload
 		students.GET("/:id", ginstudent.DetailStudent(appCtx))
 		students.PATCH("/:id", ginstudent.UpdateStudent(appCtx))
 		students.DELETE("/:id", ginstudent.SoftDeleteStudent(appCtx))
+	} */
+
+	// check role admin
+	admin := v1.Group("/admin", middleware.RequireAuth(appCtx), middleware.RequireRoles(appCtx, "admin"))
+	{
+		admin.GET("/profile", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, common.SimpleSuccessResponse("He is a admin!"))
+		})
 	}
 
 	classes := v1.Group("/classes", middleware.RequireAuth(appCtx))
